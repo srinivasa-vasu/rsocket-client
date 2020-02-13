@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.rsocket.EnableRSocketSecurity;
 import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -15,9 +14,8 @@ public class SecurityConfig {
 
 	@Bean
 	public MapReactiveUserDetailsService userDetailsService() {
-		UserDetails user = User.withUsername("user")
-				.password(passwordEncoder().encode("user")).roles("").build();
-		return new MapReactiveUserDetailsService(user);
+		return new MapReactiveUserDetailsService(User.withUsername("user")
+				.password(passwordEncoder().encode("user")).roles("").build());
 	}
 
 	@Bean
@@ -25,4 +23,3 @@ public class SecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 }
-

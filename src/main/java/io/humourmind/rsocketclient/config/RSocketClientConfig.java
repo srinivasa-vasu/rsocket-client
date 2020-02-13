@@ -1,5 +1,7 @@
 package io.humourmind.rsocketclient.config;
 
+import static org.springframework.security.rsocket.metadata.UsernamePasswordMetadata.BASIC_AUTHENTICATION_MIME_TYPE;
+
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -8,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
+import org.springframework.security.rsocket.metadata.BasicAuthenticationEncoder;
+import org.springframework.security.rsocket.metadata.UsernamePasswordMetadata;
 import org.springframework.util.MimeTypeUtils;
 
 import io.rsocket.frame.decoder.PayloadDecoder;
@@ -27,7 +31,13 @@ public class RSocketClientConfig {
 	@Bean
 	Mono<RSocketRequester> requester(RSocketStrategies strategies)
 			throws URISyntaxException {
-		return RSocketRequester.builder().rsocketStrategies(strategies)
+		return RSocketRequester.builder()
+				.rsocketStrategies(strategies.mutate()
+						.encoder(new BasicAuthenticationEncoder()).build())
+				.setupMetadata(
+						new UsernamePasswordMetadata(clientConfigProp.getUsername(),
+								clientConfigProp.getPassword()),
+						BASIC_AUTHENTICATION_MIME_TYPE)
 				.rsocketFactory(factory -> {
 					factory.dataMimeType(MimeTypeUtils.ALL_VALUE)
 							.frameDecoder(PayloadDecoder.ZERO_COPY);

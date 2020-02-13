@@ -2,3 +2,5 @@ client-prop:
   host: localhost
   port: 8000
   protocol: websocket
+  username: spring
+  password: rsocket

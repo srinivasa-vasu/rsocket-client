@@ -23,5 +23,7 @@ public class ClientConfigProp {
 	private String host;
 	private int port;
 	private String protocol = "tcp";
+	private String username;
+	private String password;
 
 }
