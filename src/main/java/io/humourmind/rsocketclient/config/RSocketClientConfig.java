@@ -30,7 +30,7 @@ public class RSocketClientConfig {
 		return RSocketRequester.builder().rsocketStrategies(strategies)
 				.rsocketFactory(factory -> {
 					factory.dataMimeType(MimeTypeUtils.ALL_VALUE)
-							.frameDecoder(PayloadDecoder.ZERO_COPY);
+							.frameDecoder(PayloadDecoder.ZERO_COPY).resume();
 				})
 				.connect("tcp".equalsIgnoreCase(clientConfigProp.getProtocol())
 						? TcpClientTransport.create(new InetSocketAddress(
@@ -38,7 +38,8 @@ public class RSocketClientConfig {
 						: WebsocketClientTransport
 								.create(new URI(String.format("ws://%s:%d/rsocket",
 										clientConfigProp.getHost(),
-										clientConfigProp.getPort()))));
+										clientConfigProp.getPort()))))
+				.retry().log();
 	}
 
 }

@@ -22,11 +22,9 @@ public class QuoteClientController {
 
 	public QuoteClientController(Mono<RSocketRequester> requester) {
 		this.requester = requester;
-		this.allQuoteStream = this.requester.flatMapMany(req -> req
-				.route("all-quote-stream").data(Mono.empty()).retrieveFlux(Quote.class)
-				.retry().share().doOnError((exception) -> {
-					log.error("Received an error from server. Retrying...", exception);
-				}));
+		this.allQuoteStream = this.requester
+				.flatMapMany(req -> req.route("all-quote-stream").data(Mono.empty())
+						.retrieveFlux(Quote.class).retry().share());
 	}
 
 	@GetMapping(value = "/v1/quotes", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
@@ -38,24 +36,19 @@ public class QuoteClientController {
 	public Publisher<Quote> getFilteredQuotesStream() {
 		return requester.flatMapMany(req -> req.route("filtered-quote-stream")
 				.data(Flux.just("FB", "AMZN", "AAPL", "NFLX", "GOOGL"))
-				.retrieveFlux(Quote.class).retry());
-
-		// return requester.route("filtered-quote-stream")
-		// .data(Flux.interval(Duration.ofSeconds(1))
-		// .compose(e -> Flux.just("FB", "AMZN", "AAPL", "NFLX", "GOOGL")))
-		// .retrieveFlux(Quote.class);
+				.retrieveFlux(Quote.class));
 	}
 
 	@GetMapping(value = "/v1/quotes/{symbol}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Publisher<Quote> getAQuoteStream(@PathVariable String symbol) {
 		return requester.flatMapMany(req -> req.route("a-quote-stream")
-				.data(Mono.just(symbol)).retrieveFlux(Quote.class).retry());
+				.data(Mono.just(symbol)).retrieveFlux(Quote.class));
 	}
 
 	@GetMapping(value = "/v1/quote/{symbol}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Publisher<Quote> getAQuote(@PathVariable String symbol) {
 		return requester.flatMap(req -> req.route("a-quote").data(Mono.just(symbol))
-				.retrieveMono(Quote.class).retry());
+				.retrieveMono(Quote.class));
 	}
 
 }
